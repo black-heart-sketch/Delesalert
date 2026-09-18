@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-ink: #0f172a;
+    --color-canvas: #f6f8fc;
+    --color-brand: #0369a1;
+    --color-brand-dark: #0c4a6e;
+    --color-electric: #eab308;
+}
+
+@layer base {
+    body > main {
+        min-height: calc(100dvh - 4.5rem);
+    }
+
+    /* Page shells use the available workspace while content remains padded. */
+    body > main > .mx-auto.max-w-7xl,
+    body > main > .mx-auto.max-w-4xl,
+    body > main > .mx-auto.max-w-3xl,
+    body > main > section.mx-auto.max-w-7xl,
+    body > main > section > .mx-auto.max-w-7xl,
+    #main-content > .mx-auto.max-w-7xl,
+    #main-content > .mx-auto.max-w-4xl,
+    #main-content > .mx-auto.max-w-3xl,
+    footer > .mx-auto.max-w-7xl {
+        width: 100%;
+        max-width: none;
+        margin-inline: 0;
+    }
+}
