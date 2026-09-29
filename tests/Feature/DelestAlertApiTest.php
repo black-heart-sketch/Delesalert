@@ -46,10 +46,11 @@ class DelestAlertApiTest extends TestCase
             ->assertSee('Provider workspace')
             ->assertSee('Open incidents')
             ->assertSee('Outage board')
-            ->assertDontSee('My locations');
+            ->assertSee('My locations')
+            ->assertSee('My bills');
     }
 
-    public function test_admin_dashboard_shows_administration_navigation_without_client_actions(): void
+    public function test_admin_dashboard_shows_administration_and_client_navigation(): void
     {
         $admin = User::factory()->create(['role' => 'ADMIN', 'status' => 'ACTIVE']);
 
@@ -57,7 +58,8 @@ class DelestAlertApiTest extends TestCase
             ->get('/dashboard')
             ->assertSee('Platform command center')
             ->assertSee('Map provider')
-            ->assertDontSee('Report outage');
+            ->assertSee('Report outage')
+            ->assertSee('My bills');
     }
 
     public function test_admin_can_update_the_map_provider_from_the_web_settings_screen(): void

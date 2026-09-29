@@ -73,15 +73,17 @@ class ClientProfileApiTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $client->id, 'status' => 'DEACTIVATED']);
     }
 
-    public function test_provider_cannot_access_client_resources(): void
+    public function test_provider_and_administrator_can_access_client_resources(): void
     {
-        $provider = User::factory()->create(['role' => 'PROVIDER']);
-        Sanctum::actingAs($provider);
+        foreach (['PROVIDER', 'ADMIN'] as $role) {
+            $user = User::factory()->create(['role' => $role]);
+            Sanctum::actingAs($user);
 
-        $this->getJson('/api/profile')->assertForbidden();
-        $this->getJson('/api/locations')->assertForbidden();
-        $this->getJson('/api/notifications')->assertForbidden();
-        $this->getJson('/api/predictions')->assertForbidden();
+            $this->getJson('/api/profile')->assertOk();
+            $this->getJson('/api/locations')->assertOk();
+            $this->getJson('/api/notifications')->assertOk();
+            $this->getJson('/api/predictions')->assertOk();
+        }
     }
 
     public function test_outage_history_requires_an_authenticated_client_or_admin(): void

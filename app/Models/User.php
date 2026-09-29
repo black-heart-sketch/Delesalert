@@ -43,9 +43,15 @@ class User extends Authenticatable
         return '@'.trim($clean, '_');
     }
 
+    /**
+     * Determine whether the user holds one of the supplied roles.
+     *
+     * Provider and Administrator accounts inherit Client capabilities while retaining their own controls.
+     */
     public function hasRole(string ...$roles): bool
     {
-        return in_array($this->role, $roles, true);
+        return in_array($this->role, $roles, true)
+            || (in_array('CLIENT', $roles, true) && in_array($this->role, ['PROVIDER', 'ADMIN'], true));
     }
 
     public function locations(): HasMany
