@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
@@ -33,6 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('notification-preferences', [NotificationController::class, 'updatePreference']);
         Route::post('reports', [ReportController::class, 'store']);
         Route::get('reports/my', [ReportController::class, 'mine']);
+        Route::get('bills', [BillController::class, 'index']);
+        Route::post('bills/{bill}/payments', [BillController::class, 'store'])->middleware('throttle:payments');
+        Route::post('bill-payments/{payment}/refresh', [BillController::class, 'refresh'])->middleware('throttle:payments');
     });
     Route::middleware('role:CLIENT,ADMIN')->group(function () {
         Route::get('outages/history', [OutageController::class, 'history']);

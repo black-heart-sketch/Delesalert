@@ -10,7 +10,7 @@ class Prediction extends Model
 
     protected function casts(): array
     {
-        return ['predicted_start' => 'datetime', 'predicted_end' => 'datetime', 'generated_at' => 'datetime', 'probability' => 'float', 'confidence_score' => 'float'];
+        return ['predicted_start' => 'datetime', 'predicted_end' => 'datetime', 'generated_at' => 'datetime', 'probability' => 'float', 'confidence_score' => 'float', 'input_metrics' => 'array', 'factors' => 'array', 'ai_generated' => 'boolean'];
     }
 
     public function zone()

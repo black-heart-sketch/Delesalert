@@ -9,12 +9,13 @@ use App\Models\OutageReport;
 use App\Models\Prediction;
 use App\Models\User;
 use App\Models\Zone;
+use App\Services\ZoneMapData;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request, ZoneMapData $zoneMapData): View
     {
         $user = $request->user();
         $baseData = ['role' => $user->role];
@@ -38,10 +39,21 @@ class DashboardController extends Controller
                 'activity' => OutageReport::with('user', 'zone')->where('status', 'PENDING')->latest()->take(5)->get(),
                 'currentOutages' => Outage::query()->where('status', 'ONGOING')->with('zone')->latest('actual_start')->take(5)->get(),
                 'scheduledOutages' => Outage::query()->where('status', 'PLANNED')->with('zone')->orderBy('scheduled_start')->take(4)->get(),
+                'mapPayload' => $zoneMapData->build(),
+                'mapTileUrl' => config('delestalert.maps.leaflet_tile_url'),
+                'mapTitle' => 'National network map',
+                'mapDescription' => 'Monitor every mapped zone, active disruption, incident, and AI risk signal from one place.',
             ]);
         }
 
         if ($user->hasRole('PROVIDER')) {
+            $operationalZoneIds = Outage::query()
+                ->where('created_by', $user->id)
+                ->pluck('zone_id')
+                ->merge(Incident::query()->whereBelongsTo($user, 'provider')->pluck('zone_id'))
+                ->unique()
+                ->values();
+
             return view('dashboard', $baseData + [
                 'title' => 'Provider workspace',
                 'subtitle' => 'Monitor your published notices and keep the network picture accurate.',
@@ -60,6 +72,12 @@ class DashboardController extends Controller
                 'activity' => Incident::whereBelongsTo($user, 'provider')->with('zone')->latest('occurred_at')->take(5)->get(),
                 'currentOutages' => Outage::query()->where('created_by', $user->id)->where('status', 'ONGOING')->with('zone')->latest('actual_start')->take(5)->get(),
                 'scheduledOutages' => Outage::query()->where('created_by', $user->id)->where('status', 'PLANNED')->with('zone')->orderBy('scheduled_start')->take(4)->get(),
+                'mapPayload' => $zoneMapData->build($operationalZoneIds->isNotEmpty() ? $operationalZoneIds : null),
+                'mapTileUrl' => config('delestalert.maps.leaflet_tile_url'),
+                'mapTitle' => 'Your operational map',
+                'mapDescription' => $operationalZoneIds->isNotEmpty()
+                    ? 'Follow the zones connected to your published outages and incidents.'
+                    : 'No operational zone is assigned yet, so the complete network is shown.',
             ]);
         }
 
@@ -88,6 +106,12 @@ class DashboardController extends Controller
             'activity' => $user->reports()->with('zone')->latest('reported_at')->take(5)->get(),
             'currentOutages' => $relevantCurrentOutages,
             'scheduledOutages' => $relevantScheduledOutages,
+            'mapPayload' => $zoneMapData->build($savedZoneIds->isNotEmpty() ? $savedZoneIds : null),
+            'mapTileUrl' => config('delestalert.maps.leaflet_tile_url'),
+            'mapTitle' => $savedZoneIds->isNotEmpty() ? 'Your monitored zones' : 'Cameroon network map',
+            'mapDescription' => $savedZoneIds->isNotEmpty()
+                ? 'See the live status and outage risk for the places you have saved.'
+                : 'Save a location to focus this map on the places that matter to you.',
         ]);
     }
 }

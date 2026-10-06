@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'digipay' => [
+        'key' => env('DIGIPAY_API_KEY'),
+        'environment' => env('DIGIPAY_ENVIRONMENT', 'sandbox'),
+        'base_url' => env('DIGIPAY_BASE_URL'),
+        'timeout' => (int) env('DIGIPAY_TIMEOUT', 15),
+    ],
+
 ];

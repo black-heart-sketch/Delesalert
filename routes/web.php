@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\BillController;
 use App\Http\Controllers\Web\CommunityController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\LocaleController;
 use App\Http\Controllers\Web\LocationController;
 use App\Http\Controllers\Web\MapSettingsController;
@@ -13,7 +14,7 @@ use App\Http\Controllers\Web\OutageManagementController;
 use App\Http\Controllers\Web\ReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
 Route::get('/outages', [OutageController::class, 'index'])->name('outages.index');
 Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
@@ -41,7 +42,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/notifications/read-all', [NotificationCenterController::class, 'readAll'])->name('notifications.read-all');
         Route::patch('/notifications/{notification}/read', [NotificationCenterController::class, 'read'])->name('notifications.read');
         Route::get('/bills', [BillController::class, 'index'])->name('bills.index');
-        Route::post('/bills/{bill}/pay', [BillController::class, 'pay'])->name('bills.pay');
+        Route::post('/bills/{bill}/pay', [BillController::class, 'pay'])->middleware('throttle:payments')->name('bills.pay');
+        Route::post('/bill-payments/{payment}/refresh', [BillController::class, 'refresh'])->middleware('throttle:payments')->name('bill-payments.refresh');
     });
     Route::middleware('role:PROVIDER,ADMIN')->group(function () {
         Route::get('/manage/outages', [OutageManagementController::class, 'index'])->name('outages.manage');

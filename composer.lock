@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a9a1efca8c098809583d7897477bedf",
+    "content-hash": "342b472e7f14f166724fd488ec76e74d",
     "packages": [
         {
             "name": "brick/math",
@@ -213,6 +213,65 @@
                 "source": "https://github.com/dflydev/dflydev-dot-access-data/tree/v3.0.3"
             },
             "time": "2024-07-08T12:26:09+00:00"
+        },
+        {
+            "name": "digipay/digipay-php",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/black-heart-sketch/digipay-php.git",
+                "reference": "9ddbf3d2c4431b3b77573785b5f14213d0450e6b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/black-heart-sketch/digipay-php/zipball/9ddbf3d2c4431b3b77573785b5f14213d0450e6b",
+                "reference": "9ddbf3d2c4431b3b77573785b5f14213d0450e6b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "DigiPay\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "DigiPay",
+                    "email": "support@digitalcertify.tech",
+                    "homepage": "https://digitalcertify.tech"
+                }
+            ],
+            "description": "Official DigiPay PHP SDK — Accept Mobile Money payments, query transactions, manage payouts.",
+            "homepage": "https://digitalcertify.tech/v1/api/",
+            "keywords": [
+                "Cameroon",
+                "africa",
+                "digipay",
+                "fintech",
+                "mobile-money",
+                "mtn",
+                "orange",
+                "payment"
+            ],
+            "support": {
+                "email": "support@digitalcertify.tech",
+                "issues": "https://github.com/digipay/digipay-php/issues",
+                "source": "https://github.com/digipay/digipay-php"
+            },
+            "time": "2026-04-13T02:03:53+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -8760,7 +8819,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "digipay/digipay-php": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

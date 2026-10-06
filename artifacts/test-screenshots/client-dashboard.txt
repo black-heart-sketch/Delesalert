@@ -1,0 +1,13 @@
+$ vendor/bin/phpunit tests/Feature/DashboardMapTest.php --filter=test_client_dashboard_map_focuses_on_saved_zones_and_is_translated --testdox
+
+PHPUnit 12.5.34 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.2
+Configuration: /Users/tchoua/Desktop/projects/delestalert/phpunit.xml
+
+Time: 00:00.701, Memory: 52.50 MB
+
+Dashboard Map (Tests\Feature\DashboardMap)
+ ✔ Client dashboard map focuses on saved zones and is translated
+
+OK (1 test, 5 assertions)

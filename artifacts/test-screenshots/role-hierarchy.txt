@@ -1,0 +1,13 @@
+$ vendor/bin/phpunit tests/Feature/RoleHierarchyTest.php --filter=test_provider_and_administrator_can_use_client_workspace_features --testdox
+
+PHPUnit 12.5.34 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.2
+Configuration: /Users/tchoua/Desktop/projects/delestalert/phpunit.xml
+
+Time: 00:00.820, Memory: 54.50 MB
+
+Role Hierarchy (Tests\Feature\RoleHierarchy)
+ ✔ Provider and administrator can use client workspace features
+
+OK (1 test, 32 assertions)

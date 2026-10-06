@@ -27,6 +27,6 @@ class Bill extends Model
 
     public function payments(): HasMany
     {
-        return $this->hasMany(BillPayment::class);
+        return $this->hasMany(BillPayment::class)->latest();
     }
 }

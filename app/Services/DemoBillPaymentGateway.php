@@ -8,8 +8,24 @@ use Illuminate\Support\Str;
 
 class DemoBillPaymentGateway implements BillPaymentGateway
 {
-    public function charge(Bill $bill): string
+    public function initiate(Bill $bill, string $customerPhone, string $customerEmail, string $localReference): array
     {
-        return 'DEMO-'.Str::upper(Str::random(12));
+        $transactionId = 'DEMO-'.Str::upper(Str::random(12));
+
+        return [
+            'transaction_id' => $transactionId,
+            'status' => 'COMPLETED',
+            'payload' => ['transactionId' => $transactionId, 'status' => 'success'],
+        ];
+    }
+
+    public function status(string $transactionId): array
+    {
+        return [
+            'transaction_id' => $transactionId,
+            'status' => 'COMPLETED',
+            'amount' => null,
+            'payload' => ['transactionId' => $transactionId, 'status' => 'success'],
+        ];
     }
 }

@@ -1,0 +1,13 @@
+$ vendor/bin/phpunit tests/Feature/DashboardMapTest.php --filter=test_administrator_dashboard_map_contains_all_zones --testdox
+
+PHPUnit 12.5.34 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.2
+Configuration: /Users/tchoua/Desktop/projects/delestalert/phpunit.xml
+
+Time: 00:00.702, Memory: 52.50 MB
+
+Dashboard Map (Tests\Feature\DashboardMap)
+ ✔ Administrator dashboard map contains all zones
+
+OK (1 test, 3 assertions)

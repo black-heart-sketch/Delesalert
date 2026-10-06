@@ -17,3 +17,7 @@ document.querySelectorAll('[data-dashboard-nav-toggle]').forEach((button) => {
         button.setAttribute('aria-expanded', String(!isOpen));
     });
 });
+
+if (document.querySelector('[data-live-map]')) {
+    import('./map');
+}

@@ -206,7 +206,7 @@
         </div>
     </section>
 
-    {{-- GOOGLE MAP SECTION --}}
+    {{-- LIVE LEAFLET MAP --}}
     <section id="live-map" class="scroll-mt-20 border-b border-slate-200 bg-slate-50 py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -231,108 +231,80 @@
                     <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
                         <span class="size-3 rounded-full bg-emerald-500"></span> {{ __('Grid Normal') }}
                     </span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                        <span class="size-3 rounded-full bg-violet-600"></span> {{ __('High AI risk') }}
+                    </span>
                 </div>
             </div>
 
-            {{-- City Filter Buttons --}}
-            <div class="mt-6 flex flex-wrap gap-2 overflow-x-auto pb-2" id="map-city-tabs">
-                <button type="button" class="city-tab-btn active rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-slate-800">
+            <div class="mt-6 flex flex-wrap items-center gap-2 overflow-x-auto pb-2" aria-label="{{ __('Filter map by city') }}">
+                <button type="button" data-map-city-filter="all" aria-pressed="true" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-slate-800">
                     🇨🇲 {{ __('All Cameroon') }}
                 </button>
-                <a href="{{ route('outages.index', ['search' => 'Douala']) }}" class="city-tab-btn rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
-                    Douala (Littoral)
-                </a>
-                <a href="{{ route('outages.index', ['search' => 'Yaoundé']) }}" class="city-tab-btn rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
-                    Yaoundé (Centre)
-                </a>
-                <a href="{{ route('outages.index', ['search' => 'Bafoussam']) }}" class="city-tab-btn rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
-                    Bafoussam (Ouest)
-                </a>
-                <a href="{{ route('outages.index', ['search' => 'Garoua']) }}" class="city-tab-btn rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
-                    Garoua (Nord)
-                </a>
-                <a href="{{ route('outages.index', ['search' => 'Bamenda']) }}" class="city-tab-btn rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
-                    Bamenda (Nord-Ouest)
-                </a>
+                @foreach($mapPayload['zones']->pluck('city')->unique()->values() as $city)
+                    <button type="button" data-map-city-filter="{{ $city }}" aria-pressed="false" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
+                        {{ $city }}
+                    </button>
+                @endforeach
+                <button type="button" data-map-locate class="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-bold text-sky-800 transition hover:bg-sky-100">
+                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+                    {{ __('My position') }}
+                </button>
             </div>
 
-            {{-- Map Display Container with Google Maps Telemetry HUD --}}
-            <div class="mt-4 overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-xl">
-                <div class="relative h-[480px] w-full bg-slate-950" id="delestalert-google-map">
-                    {{-- Google Maps Target or Interactive Visual Fallback --}}
-                    <div class="absolute inset-0 flex flex-col justify-between p-6 text-white" style="background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);">
-                        {{-- Top Map HUD --}}
-                        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 backdrop-blur-md">
-                            <div class="flex items-center gap-3">
-                                <span class="size-3 rounded-full bg-emerald-400 animate-ping"></span>
-                                <span class="text-xs font-bold uppercase tracking-wider text-slate-200">{{ __('Google Maps Telemetry Online') }}</span>
-                            </div>
-                            <span class="text-xs text-sky-300 font-mono">GPS: 3.8480° N, 11.5021° E · Cameroon Grid</span>
-                        </div>
-
-                        {{-- Interactive Map Pin Overlay for Cameroon --}}
-                        <div class="relative my-auto grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto w-full">
-                            {{-- Douala Pin Card --}}
-                            <div class="rounded-2xl border border-rose-500/40 bg-slate-900/90 p-4 shadow-lg backdrop-blur-md">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="size-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-                                        <h4 class="font-bold text-white text-sm">Douala (Littoral)</h4>
-                                    </div>
-                                    <span class="rounded bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300">{{ __('Outage Active') }}</span>
-                                </div>
-                                <p class="mt-2 text-xs text-slate-300 font-medium">Bonamoussadi · Makepe · Logpom</p>
-                                <p class="mt-1 text-[11px] text-slate-400">Emergency transformer repair in progress.</p>
-                                <a href="{{ route('outages.index', ['search' => 'Douala']) }}" class="mt-3 inline-flex text-xs font-semibold text-sky-400 hover:text-sky-300">
-                                    {{ __('View Douala Outages') }} →
-                                </a>
-                            </div>
-
-                            {{-- Yaoundé Pin Card --}}
-                            <div class="rounded-2xl border border-amber-500/40 bg-slate-900/90 p-4 shadow-lg backdrop-blur-md">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="size-2.5 rounded-full bg-amber-500"></span>
-                                        <h4 class="font-bold text-white text-sm">Yaoundé (Centre)</h4>
-                                    </div>
-                                    <span class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">{{ __('Scheduled') }}</span>
-                                </div>
-                                <p class="mt-2 text-xs text-slate-300 font-medium">Bastos · Golf · Omnisports</p>
-                                <p class="mt-1 text-[11px] text-slate-400">{{ __('Planned line maintenance tomorrow 08:00.') }}</p>
-                                <a href="{{ route('outages.index', ['search' => 'Yaoundé']) }}" class="mt-3 inline-flex text-xs font-semibold text-sky-400 hover:text-sky-300">
-                                    {{ __('View Yaoundé Outages') }} →
-                                </a>
-                            </div>
-
-                            {{-- Bafoussam & West Pin Card --}}
-                            <div class="rounded-2xl border border-emerald-500/40 bg-slate-900/90 p-4 shadow-lg backdrop-blur-md">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="size-2.5 rounded-full bg-emerald-500"></span>
-                                        <h4 class="font-bold text-white text-sm">Bafoussam (Ouest)</h4>
-                                    </div>
-                                    <span class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">{{ __('Grid Stable') }}</span>
-                                </div>
-                                <p class="mt-2 text-xs text-slate-300 font-medium">Djeleng · Tougang · Famla</p>
-                                <p class="mt-1 text-[11px] text-slate-400">{{ __('No active disruptions reported in last 24h.') }}</p>
-                                <a href="{{ route('outages.index', ['search' => 'Bafoussam']) }}" class="mt-3 inline-flex text-xs font-semibold text-sky-400 hover:text-sky-300">
-                                    {{ __('View West Region') }} →
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Bottom Map Controls --}}
-                        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 border-t border-white/10 pt-3">
-                            <span>Google Maps Engine · Integrated for DelestAlert</span>
-                            <a href="{{ route('reports.create') }}" class="rounded-lg bg-white/10 px-3 py-1.5 font-semibold text-white hover:bg-white/20">
-                                📢 {{ __('Report an outage in your area') }}
-                            </a>
-                        </div>
+            <div class="mt-4 grid overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-xl lg:grid-cols-[minmax(0,1fr)_21rem]">
+                <div class="relative min-h-[28rem] lg:min-h-[34rem]">
+                    <div data-live-map data-tile-url="{{ $mapTileUrl }}" class="absolute inset-0 z-0 bg-slate-200" aria-label="{{ __('Interactive map of electricity zones') }}"></div>
+                    <div class="pointer-events-none absolute left-4 top-4 z-[500] rounded-xl border border-white/70 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg backdrop-blur">
+                        <span class="inline-flex items-center gap-2"><span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>{{ trans_choice(':count mapped zone|:count mapped zones', $mapPayload['zones']->count(), ['count' => $mapPayload['zones']->count()]) }}</span>
                     </div>
                 </div>
+                <aside class="max-h-[34rem] overflow-y-auto border-t border-slate-200 bg-slate-50 lg:border-l lg:border-t-0" aria-label="{{ __('Mapped zones') }}">
+                    <div class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 p-4 backdrop-blur">
+                        <h3 class="font-bold text-slate-950">{{ __('Zone information') }}</h3>
+                        <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('Select a zone to center the map and view its details.') }}</p>
+                    </div>
+                    <div class="divide-y divide-slate-200">
+                        @foreach($mapPayload['zones'] as $zone)
+                            @php
+                                $statusClasses = match ($zone['status']) {
+                                    'outage' => 'bg-rose-500',
+                                    'planned' => 'bg-amber-500',
+                                    'risk' => 'bg-violet-600',
+                                    default => 'bg-emerald-500',
+                                };
+                                $statusLabel = match ($zone['status']) {
+                                    'outage' => __('Outage in progress'),
+                                    'planned' => __('Scheduled maintenance'),
+                                    'risk' => __('High AI risk'),
+                                    default => __('Grid stable'),
+                                };
+                            @endphp
+                            <button type="button" data-map-zone-card data-map-zone="{{ $zone['id'] }}" data-map-city="{{ $zone['city'] }}" class="flex w-full gap-3 p-4 text-left transition hover:bg-white focus-visible:bg-white focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-sky-600">
+                                <span class="mt-1.5 size-3 shrink-0 rounded-full {{ $statusClasses }}"></span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex items-start justify-between gap-2"><strong class="text-sm text-slate-950">{{ $zone['name'] }}</strong><span class="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $statusLabel }}</span></span>
+                                    <span class="mt-1 block text-xs text-slate-500">{{ $zone['city'] }} · {{ $zone['region'] }}</span>
+                                    <span class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600">
+                                        <span>{{ $zone['activeOutages'] }} {{ __('active') }}</span>
+                                        <span>{{ $zone['openIncidents'] }} {{ __('incidents') }}</span>
+                                        @if($zone['prediction'])<span>{{ $zone['prediction']['probability'] }}% {{ __('risk') }}</span>@endif
+                                    </span>
+                                </span>
+                            </button>
+                        @endforeach
+                    </div>
+                </aside>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+                <span>{{ __('Map data from OpenStreetMap. Operational information comes from DelestAlert records.') }}</span>
+                <a href="{{ route('reports.create') }}" class="rounded-lg bg-slate-900 px-3 py-2 font-semibold text-white transition hover:bg-slate-700">📢 {{ __('Report an outage in your area') }}</a>
             </div>
         </div>
     </section>
+
+    <script>window.delestAlertMap = {{ Illuminate\Support\Js::from($mapPayload) }};</script>
 
     {{-- TWITTER / X STYLE COMMUNITY WIRE WITH CERTIFIED ENEO BADGES --}}
     <section id="community-wire" class="scroll-mt-20 border-b border-slate-200 bg-white py-16 sm:py-24">

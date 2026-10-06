@@ -1,0 +1,13 @@
+$ vendor/bin/phpunit tests/Feature/DashboardMapTest.php --filter=test_provider_dashboard_map_contains_only_operational_zones --testdox
+
+PHPUnit 12.5.34 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.2
+Configuration: /Users/tchoua/Desktop/projects/delestalert/phpunit.xml
+
+Time: 00:00.701, Memory: 52.50 MB
+
+Dashboard Map (Tests\Feature\DashboardMap)
+ ✔ Provider dashboard map contains only operational zones
+
+OK (1 test, 3 assertions)

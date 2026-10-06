@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Contracts\BillPaymentGateway;
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
 use App\Models\BillPayment;
+use App\Services\BillPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Throwable;
 
 class BillController extends Controller
 {
@@ -20,31 +20,56 @@ class BillController extends Controller
         ]);
     }
 
-    public function pay(Request $request, Bill $bill, BillPaymentGateway $paymentGateway): RedirectResponse
+    public function pay(Request $request, Bill $bill, BillPaymentService $payments): RedirectResponse
     {
         abort_unless($bill->user_id === $request->user()->id, 404);
-        abort_unless(config('delestalert.payments.driver') === 'demo', 503, 'A payment provider has not been configured.');
+        $phone = $this->validatedPhone($request);
 
-        $payment = DB::transaction(function () use ($bill, $paymentGateway, $request): BillPayment {
-            $lockedBill = Bill::query()->lockForUpdate()->findOrFail($bill->id);
-            abort_if($lockedBill->status === 'PAID', 422, 'This bill has already been paid.');
+        try {
+            $payment = $payments->initiate($bill, $request->user(), $phone);
+        } catch (Throwable $exception) {
+            report($exception);
 
-            $payment = BillPayment::create([
-                'bill_id' => $lockedBill->id,
-                'user_id' => $request->user()->id,
-                'amount' => $lockedBill->amount_due,
-                'currency' => $lockedBill->currency,
-                'provider' => mb_strtoupper(config('delestalert.payments.driver')),
-                'status' => 'COMPLETED',
-                'transaction_reference' => $paymentGateway->charge($lockedBill),
-                'paid_at' => now(),
-            ]);
+            return back()->withErrors(['payment' => __('The payment could not be initiated. Please try again.')]);
+        }
 
-            $lockedBill->update(['status' => 'PAID', 'paid_at' => $payment->paid_at]);
+        $message = match ($payment->status) {
+            'COMPLETED' => __('Payment confirmed. Receipt :reference is available in your history.', ['reference' => $payment->transaction_reference]),
+            'REVIEW' => __('This payment requires verification. Do not initiate another payment.'),
+            default => __('Mobile Money confirmation requested. Approve it on your phone, then check the status.'),
+        };
 
-            return $payment;
-        });
+        return redirect()->route('bills.index')->with('success', $message);
+    }
 
-        return redirect()->route('bills.index')->with('success', 'Payment recorded. Receipt '.$payment->transaction_reference.' is available in your payment history.');
+    public function refresh(Request $request, BillPayment $payment, BillPaymentService $payments): RedirectResponse
+    {
+        abort_unless($payment->user_id === $request->user()->id, 404);
+
+        try {
+            $payment = $payments->refresh($payment);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors(['payment' => __('The payment status could not be verified. Please try again.')]);
+        }
+
+        return back()->with('success', $payment->status === 'COMPLETED'
+            ? __('Payment confirmed. Your bill is now paid.')
+            : __('Payment status: :status', ['status' => __($payment->status)]));
+    }
+
+    private function validatedPhone(Request $request): string
+    {
+        if (config('delestalert.payments.driver') !== 'digipay') {
+            return '237600000000';
+        }
+
+        abort_unless(filled(config('services.digipay.key')), 503, 'DigiPay has not been configured.');
+        $data = $request->validate([
+            'phone' => ['required', 'string', 'regex:/^\\+?2376\\d{8}$/'],
+        ]);
+
+        return ltrim($data['phone'], '+');
     }
 }
